@@ -21,5 +21,14 @@ jobs:
       - name: Install dependencies
         run: pip3 install -r requirements.txt
 
+      - name: Debug - List Files
+        run: ls -lh # This will show if jobs.db exists
+
+      - name: Debug - Check SQLite Tables
+        run: sqlite3 jobs.db ".tables" || echo "⚠️ No database found"
+
+      - name: Debug - Show Job Entries
+        run: sqlite3 jobs.db "SELECT * FROM jobs LIMIT 5;" || echo "⚠️ No jobs saved"
+
       - name: Run Scraper in Background
         run: nohup python app.py & sleep 10
