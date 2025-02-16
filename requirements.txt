@@ -2,4 +2,3 @@ Flask
 selenium
 undetected-chromedriver
 webdriver-manager
-sqlite3
