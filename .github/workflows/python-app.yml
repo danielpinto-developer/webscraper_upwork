@@ -23,3 +23,7 @@ jobs:
 
       - name: Run Scraper
         run: python app.py
+<<<<<<< HEAD
+=======
+
+>>>>>>> b483221 (Added GitHub Actions workflow)
