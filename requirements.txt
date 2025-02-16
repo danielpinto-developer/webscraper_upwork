@@ -1,3 +1,5 @@
+Flask
 selenium
 undetected-chromedriver
-pyautogui
+webdriver-manager
+sqlite3
