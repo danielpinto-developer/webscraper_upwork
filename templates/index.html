@@ -1,65 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upwork Jobs - Last 2 Hours</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-        background-color: #f9f9f9;
-        color: #333;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        background-color: #fff;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      }
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
-      }
-      th {
-        background-color: #007bff;
-        color: white;
-      }
-      h2 {
-        color: #007bff;
-        text-align: center;
-      }
-      a {
-        color: #007bff;
-        text-decoration: none;
-      }
-      a:hover {
-        text-decoration: underline;
-      }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        h2 {
+            color: #007bff;
+            text-align: center;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .keyword-section {
+            margin-top: 30px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-left: 5px solid #007bff;
+        }
     </style>
-  </head>
-  <body>
-    <h2>🚀 Upwork Jobs - Last 2xx Hours</h2>
+</head>
+<body>
 
-    <table>
-      <thead>
+<h2>🚀 Upwork Jobs - Last 2 Hours</h2>
+
+{% if jobs %}
+    {% set current_keyword = None %}
+    {% for job in jobs %}
+        {% if job[3] != current_keyword %}
+            {% if current_keyword is not none %}
+                </tbody>
+            {% endif %}
+            <div class="keyword-section">
+                <h3>🔑 Jobs for Keyword: {{ job[3] }}</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Posted Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+            {% set current_keyword = job[3] %}
+        {% endif %}
+
         <tr>
-          <th>Job Title</th>
-          <th>Posted Time</th>
+            <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
+            <td>{{ job[2] }}</td>
         </tr>
-      </thead>
-      <tbody>
-        {% for job in jobs %} {% set time_parts = job[2].split() %} {% if
-        'minute' in job[2] or ('hour' in job[2] and time_parts[0]|int <= 2) %}
-        <tr>
-          <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
-          <td>{{ job[2] }}</td>
-        </tr>
-        {% endif %} {% endfor %}
-      </tbody>
+
+    {% endfor %}
+    </tbody>
     </table>
-  </body>
+{% else %}
+    <p>No jobs found in the last 2 hours.</p>
+{% endif %}
+
+</body>
 </html>
