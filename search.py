@@ -132,3 +132,4 @@ if __name__ == "__main__":
         print("❌ No new jobs found.")
 
     print("✅ Scraper finished.")
+
