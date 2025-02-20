@@ -4,10 +4,10 @@ import random
 import signal
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 import re
+import datetime
 
 # Database Name
 DB_NAME = "upwork_jobs.db"
@@ -23,7 +23,7 @@ def timeout_handler(signum, frame):
 signal.signal(signal.SIGALRM, timeout_handler)
 signal.alarm(TIMEOUT)
 
-# Set Up Database
+# Set Up Database (Fresh every run)
 def setup_database():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -42,7 +42,7 @@ def setup_database():
     print("✅ Database setup complete.")
 
 # Keywords to Search
-SEARCH_KEYWORDS = ["scraping", "python", "ai", "api", "bot"]
+SEARCH_KEYWORDS = ["scraping", "python", "ai", "api", "bot", "automation", "data", "machine learning", "chatbot", "web scraping", "api integration", "flask", "bubble", "app development", "react"]
 
 # Convert posted time to minutes
 def parse_posted_time(posted_time):
@@ -89,15 +89,15 @@ def scrape_upwork_jobs():
                 except:
                     posted_time = "Unknown"
 
-                # Convert posted time to minutes & filter only jobs in the last 3 hours
+                # Convert posted time to minutes & filter only jobs in the last 2 hours
                 posted_minutes_ago = parse_posted_time(posted_time)
-                if posted_minutes_ago > 180:
+                if posted_minutes_ago > 120:
                     print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
                     continue
 
-                print(f"✅ Found Job: {title} | {posted_time}")
-
-                all_jobs.append((title, "N/A", 0, job_link, posted_time))
+                # ✅ Always insert job without duplicate check!
+                print(f"✅ New Job Found: {title} | {posted_time}")
+                all_jobs.append((title, "N/A", 0, job_link, datetime.datetime.utcnow().isoformat()))
 
             except Exception as e:
                 print(f"❌ Error scraping job: {e}")
@@ -129,6 +129,6 @@ if __name__ == "__main__":
     if jobs:
         store_jobs_in_db(jobs)
     else:
-        print("❌ No matching jobs found.")
+        print("❌ No new jobs found.")
 
     print("✅ Scraper finished.")

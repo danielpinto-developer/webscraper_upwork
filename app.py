@@ -1,32 +1,23 @@
 import sqlite3
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
+DB_NAME = "upwork_jobs.db"
 
-def scrape_data():
-    print("🔄 Scraper started...")  # Debugging output
-    jobs = [
-        ("Python Developer", "Upwork", "https://www.upwork.com/job/12345"),
-        ("API Integration Expert", "Freelancer", "https://www.freelancer.com/job/54321")
-    ]  # Mock jobs to test if they get saved
-
-    conn = sqlite3.connect("jobs.db")
+# Fetch jobs from SQLite
+def get_jobs():
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS jobs (title TEXT, company TEXT, url TEXT)''')
-
-    for job in jobs:
-        cursor.execute("INSERT INTO jobs (title, company, url) VALUES (?, ?, ?)", job)
-        print(f"✅ Saved job: {job[0]}")  # Debugging output
-
-    conn.commit()
+    cursor.execute("SELECT title, job_link, posted_time FROM jobs ORDER BY id DESC")
+    jobs = cursor.fetchall()
     conn.close()
-    print("✅ Scraper completed.")
+    return jobs
 
+# Home route to display jobs
 @app.route("/")
 def home():
-    scrape_data()  # Ensure scraper runs when visiting the root URL
-    return "Scraper ran successfully!"
+    jobs = get_jobs()
+    return render_template("index.html", jobs=jobs)
 
 if __name__ == "__main__":
-    scrape_data()  # Force run when Flask starts
     app.run(debug=True, host="0.0.0.0", port=5000)

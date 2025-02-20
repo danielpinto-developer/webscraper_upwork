@@ -3,40 +3,66 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Upwork Scraper</title>
+    <title>Upwork Jobs - Last 2 Hours</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        margin: 20px;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
       }
       table {
         width: 100%;
         border-collapse: collapse;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin: 20px auto;
       }
       th,
       td {
-        border: 1px solid #ddd;
-        padding: 8px;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
         text-align: left;
       }
       th {
-        background-color: #f4f4f4;
+        background-color: #007bff;
+        color: white;
+      }
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+      a {
+        color: #007bff;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
-    <h2>Upwork Jobs (Last 3 Hours)</h2>
+    <h1>🚀 Upwork Jobs - Last 2 Hours</h1>
+
     <table>
-      <tr>
-        <th>Job Title</th>
-        <th>Posted Time</th>
-      </tr>
-      {% for job in jobs %}
-      <tr>
-        <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
-        <td>{{ job[2] }}</td>
-      </tr>
-      {% endfor %}
+      <thead>
+        <tr>
+          <th>Job Title</th>
+          <th>Posted Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if jobs %} {% for job in jobs %}
+        <tr>
+          <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
+          <td>{{ job[2] }}</td>
+        </tr>
+        {% endfor %} {% else %}
+        <tr>
+          <td colspan="2">❌ No jobs found in the last 2 hours.</td>
+        </tr>
+        {% endif %}
+      </tbody>
     </table>
   </body>
 </html>
