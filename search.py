@@ -54,7 +54,7 @@ def parse_posted_time(posted_time):
             return datetime.datetime.now() - datetime.timedelta(minutes=value)
         elif unit == "hour":
             return datetime.datetime.now() - datetime.timedelta(hours=value)
-    return datetime.datetime.now()  # Default to "now" if parsing fails
+    return None
 
 # Start Selenium WebDriver
 def start_driver():
@@ -95,6 +95,10 @@ def scrape_upwork_jobs():
 
                 # Convert posted time to datetime & filter only jobs in the last 2 hours
                 actual_posted_time = parse_posted_time(posted_time)
+                if not actual_posted_time:
+                    print(f"🕒 Skipping (Invalid Time): {title} - {posted_time}")
+                    continue
+
                 two_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=2)
 
                 if actual_posted_time < two_hours_ago:
@@ -111,6 +115,9 @@ def scrape_upwork_jobs():
         time.sleep(random.randint(5, 15))  # Human-like delay
 
     driver.quit()
+
+    # Sort jobs from most recent to oldest
+    all_jobs.sort(key=lambda x: x[4], reverse=True)
     return all_jobs
 
 # Store Jobs in SQLite Database
