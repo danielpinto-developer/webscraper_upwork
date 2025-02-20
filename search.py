@@ -46,13 +46,22 @@ SEARCH_KEYWORDS = ["scraping", "python", "ai", "api", "bot", "automation", "mach
                    "data", "selenium", "cloud", "fintech", "backend", "frontend", "full stack"]
 
 # Convert posted time to minutes
+
 def parse_posted_time(posted_time):
-    match = re.search(r'(\d+)\s*(minute|hour)', posted_time)
+    match = re.search(r'(\d+)\s*(minute|hour|day)', posted_time.lower())
     if match:
         num = int(match.group(1))
         unit = match.group(2)
-        return num if unit == "minute" else num * 60
-    return 9999  # Default to old posts if no match
+
+        # Convert to minutes
+        if unit == "minute":
+            return num  # Example: "15 minutes ago" -> 15
+        elif unit == "hour":
+            return num * 60  # Example: "2 hours ago" -> 120
+        elif unit == "day":
+            return num * 1440  # Example: "1 day ago" -> 1440 minutes (24 hours)
+
+    return 99999  # Default: Assume it's old if parsing fails
 
 # Start Selenium WebDriver
 def start_driver():
