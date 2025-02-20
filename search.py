@@ -91,17 +91,26 @@ def scrape_upwork_jobs():
                 try:
                     posted_time_element = job.find_element(By.CSS_SELECTOR, "span[data-test='posted-on']")
                     posted_time = posted_time_element.text.strip()
-                except:
-                    posted_time = "Unknown"
 
-                posted_minutes_ago = parse_posted_time(posted_time)
+                    # Convert to datetime and filter within 2 hours
+                    job_post_time = parse_posted_time(posted_time)
 
-                # Only include jobs posted within the last 2 hours
-                if posted_minutes_ago > 120:
+                    # Filter Step 1: Ensure time is valid, else skip.
+                    if not job_post_time:
+                        print(f"⚠️ Skipping job with unknown time: {title}")
+                        continue
+
+                    # Filter Step 2: Show only jobs within the last 2 hours.
+                    if (datetime.datetime.now() - job_post_time).total_seconds() > 7200:
+                        print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
+                        continue
+
+                except Exception as e:
+                    print(f"❌ Failed to get posted time: {e}")
                     continue
 
-                # Store job as tuple (title, link, posted_time, keyword)
-                all_jobs.append((title, job_link, posted_time, keyword))
+                print(f"✅ Found Job: {title} | {posted_time}")
+                all_jobs.append((title, "N/A", 0, job_link, posted_time))
 
             except Exception as e:
                 print(f"❌ Error scraping job: {e}")
@@ -110,14 +119,10 @@ def scrape_upwork_jobs():
 
     driver.quit()
 
-    # Remove duplicate jobs by title
-    unique_jobs = {}
-    for job in all_jobs:
-        title = job[0]
-        if title not in unique_jobs:
-            unique_jobs[title] = job
+    # 🔄 Sort by Newest First (based on parsed datetime)
+    all_jobs.sort(key=lambda x: parse_posted_time(x[4]), reverse=True)
 
-    return list(unique_jobs.values())
+    return all_jobs
 
 # Store Jobs in SQLite Database
 def store_jobs_in_db(jobs):

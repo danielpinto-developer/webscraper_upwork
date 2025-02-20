@@ -2,20 +2,20 @@ import sqlite3
 from flask import Flask, render_template
 
 app = Flask(__name__)
+
 DB_NAME = "upwork_jobs.db"
 
 def get_recent_jobs():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # Fetch jobs within the last 2 hours and include the keyword (assuming it's stored)
-    cursor.execute('''
-        SELECT title, job_link, posted_time, keyword
-        FROM jobs
-        WHERE posted_time LIKE '%hour%' OR posted_time LIKE '%minute%'
+    # Only fetch jobs posted within the last 2 hours
+    cursor.execute("""
+        SELECT title, job_link, posted_time 
+        FROM jobs 
+        WHERE posted_time LIKE '%%hour%' OR posted_time LIKE '%minute%'
         ORDER BY id DESC
-    ''')
-
+    """)
     jobs = cursor.fetchall()
     conn.close()
     return jobs
