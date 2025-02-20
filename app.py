@@ -8,7 +8,8 @@ DB_NAME = "upwork_jobs.db"
 def get_jobs():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("SELECT title, job_link, posted_time FROM jobs ORDER BY id DESC")
+    two_hours_ago = (datetime.datetime.utcnow() - datetime.timedelta(hours=2)).isoformat()
+    cursor.execute("SELECT title, job_link, posted_time FROM jobs ORDER BY posted_time DESC")  # Now shows the latest first
     jobs = cursor.fetchall()
     conn.close()
     return jobs
