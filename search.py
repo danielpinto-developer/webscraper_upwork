@@ -105,7 +105,7 @@ def scrape_upwork_jobs():
                 if posted_minutes_ago > 120:
                     print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
                     continue
-
+                
                 print(f"✅ Found Job: {title} | {posted_time}")
 
                 all_jobs.append((title, "N/A", 0, job_link, posted_time))
