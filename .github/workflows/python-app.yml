@@ -32,3 +32,8 @@ jobs:
 
       - name: Run Scraper in Background
         run: nohup python app.py & sleep 10
+
+      - name: Clear Old Files
+        run: |
+          rm -rf upwork_jobs.db
+          rm -rf __pycache__
