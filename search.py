@@ -91,13 +91,19 @@ def scrape_upwork_jobs():
                 job_link = title_element.get_attribute("href")
 
                 try:
-                    # Updated selector for Upwork's new format
                     posted_time_element = job.find_element(By.CSS_SELECTOR, "span[data-test='posted-on']")
                     posted_time = posted_time_element.text.strip()
 
                     # Convert to datetime and filter within 2 hours
                     job_post_time = parse_posted_time(posted_time)
-                    if job_post_time and (datetime.datetime.now() - job_post_time).total_seconds() > 7200:
+
+                    # Filter Step 1: Ensure time is valid, else skip.
+                    if not job_post_time:
+                        print(f"⚠️ Skipping job with unknown time: {title}")
+                        continue
+
+                    # Filter Step 2: Show only jobs within the last 2 hours.
+                    if (datetime.datetime.now() - job_post_time).total_seconds() > 7200:
                         print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
                         continue
 
@@ -114,6 +120,10 @@ def scrape_upwork_jobs():
         time.sleep(random.randint(5, 15))
 
     driver.quit()
+
+    # 🔄 Sort by Newest First (based on parsed datetime)
+    all_jobs.sort(key=lambda x: parse_posted_time(x[4]), reverse=True)
+
     return all_jobs
 
 # Store Jobs in SQLite Database
