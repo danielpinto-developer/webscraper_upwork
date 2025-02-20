@@ -15,8 +15,16 @@ def get_jobs():
 
 @app.route("/")
 def home():
-    jobs = get_jobs()
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT title, job_link, posted_time
+        FROM jobs
+        WHERE posted_time >= datetime('now', '-2 hours')
+        ORDER BY posted_time DESC
+    """)
+    jobs = cursor.fetchall()
+    conn.close()
+
     return render_template("index.html", jobs=jobs)
 
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)

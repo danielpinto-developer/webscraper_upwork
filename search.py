@@ -1,13 +1,14 @@
+import sqlite3
 import time
 import random
 import signal
+import datetime
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 import re
-import sqlite3
 
 # Database Name
 DB_NAME = "upwork_jobs.db"
@@ -42,26 +43,18 @@ def setup_database():
     print("✅ Database setup complete.")
 
 # Keywords to Search
-SEARCH_KEYWORDS = ["scraping", "python", "ai", "api", "bot", "automation", "machine learning",
-                   "data", "selenium", "cloud", "fintech", "backend", "frontend", "full stack"]
+SEARCH_KEYWORDS = ["scraping", "python", "ai", "api", "bot", "automation", "data", "developer", "flask", "django", "bubble", "chatbot", "web", "app", "software"]
 
-# Convert posted time to minutes
-
+# Convert posted time to datetime
 def parse_posted_time(posted_time):
-    match = re.search(r'(\d+)\s*(minute|hour|day)', posted_time.lower())
+    match = re.search(r"(\d+)\s*(minute|hour)", posted_time)
     if match:
-        num = int(match.group(1))
-        unit = match.group(2)
-
-        # Convert to minutes
+        value, unit = int(match.group(1)), match.group(2)
         if unit == "minute":
-            return num  # Example: "15 minutes ago" -> 15
+            return datetime.datetime.now() - datetime.timedelta(minutes=value)
         elif unit == "hour":
-            return num * 60  # Example: "2 hours ago" -> 120
-        elif unit == "day":
-            return num * 1440  # Example: "1 day ago" -> 1440 minutes (24 hours)
-
-    return 99999  # Default: Assume it's old if parsing fails
+            return datetime.datetime.now() - datetime.timedelta(hours=value)
+    return datetime.datetime.now()  # Default to "now" if parsing fails
 
 # Start Selenium WebDriver
 def start_driver():
@@ -100,15 +93,17 @@ def scrape_upwork_jobs():
                 except:
                     posted_time = "Unknown"
 
-                # Convert posted time to minutes & filter only jobs in the last 2 hours
-                posted_minutes_ago = parse_posted_time(posted_time)
-                if posted_minutes_ago > 120:
+                # Convert posted time to datetime & filter only jobs in the last 2 hours
+                actual_posted_time = parse_posted_time(posted_time)
+                two_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=2)
+
+                if actual_posted_time < two_hours_ago:
                     print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
                     continue
-                
-                print(f"✅ Found Job: {title} | {posted_time}")
 
-                all_jobs.append((title, "N/A", 0, job_link, posted_time))
+                print(f"✅ Found Job: {title} | {actual_posted_time}")
+
+                all_jobs.append((title, "N/A", 0, job_link, actual_posted_time.isoformat()))
 
             except Exception as e:
                 print(f"❌ Error scraping job: {e}")
