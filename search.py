@@ -47,18 +47,16 @@ SEARCH_KEYWORDS = ["scraping", "python", "ai", "api", "bot", "automation", "chro
 
 # Convert posted time to datetime
 def parse_posted_time(posted_time):
-    try:
-        if "minute" in posted_time:
-            minutes = int(posted_time.split()[0])
-            return datetime.datetime.now() - datetime.timedelta(minutes=minutes)
-        elif "hour" in posted_time:
-            hours = int(posted_time.split()[0])
-            return datetime.datetime.now() - datetime.timedelta(hours=hours)
-        else:
-            return None
-    except Exception as e:
-        print(f"⚠️ Error parsing posted time '{posted_time}': {e}")
-        return None
+    match = re.search(r'(\d+)\s*(minute|hour)', posted_time)
+    if match:
+        num = int(match.group(1))
+        unit = match.group(2)
+        if unit == "minute":
+            return num
+        elif unit == "hour":
+            return num * 60
+    return 9999  # Default for older posts
+
 
 # Start Selenium WebDriver
 def start_driver():
@@ -93,26 +91,17 @@ def scrape_upwork_jobs():
                 try:
                     posted_time_element = job.find_element(By.CSS_SELECTOR, "span[data-test='posted-on']")
                     posted_time = posted_time_element.text.strip()
+                except:
+                    posted_time = "Unknown"
 
-                    # Convert to datetime and filter within 2 hours
-                    job_post_time = parse_posted_time(posted_time)
-
-                    # Filter Step 1: Ensure time is valid, else skip.
-                    if not job_post_time:
-                        print(f"⚠️ Skipping job with unknown time: {title}")
-                        continue
-
-                    # Filter Step 2: Show only jobs within the last 2 hours.
-                    if (datetime.datetime.now() - job_post_time).total_seconds() > 7200:
-                        print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
-                        continue
-
-                except Exception as e:
-                    print(f"❌ Failed to get posted time: {e}")
+                posted_minutes_ago = parse_posted_time(posted_time)
+                if posted_minutes_ago > 120:  # 2 hours
+                    print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
                     continue
 
                 print(f"✅ Found Job: {title} | {posted_time}")
-                all_jobs.append((title, "N/A", 0, job_link, posted_time))
+
+                all_jobs.append((title, job_link, posted_time))
 
             except Exception as e:
                 print(f"❌ Error scraping job: {e}")
@@ -120,10 +109,6 @@ def scrape_upwork_jobs():
         time.sleep(random.randint(5, 15))
 
     driver.quit()
-
-    # 🔄 Sort by Newest First (based on parsed datetime)
-    all_jobs.sort(key=lambda x: parse_posted_time(x[4]), reverse=True)
-
     return all_jobs
 
 # Store Jobs in SQLite Database
