@@ -53,7 +53,7 @@
       </thead>
       <tbody>
         {% for job in jobs %} {% set time_parts = job[2].split() %} {% if
-        'minute' in job[2] or ('hour' in job[2] and time_parts[0]|int <= 2) %}
+        'minute' in job[2] or 'hour' in job[2] and time_parts[0]|int <= 2 %}
         <tr>
           <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
           <td>{{ job[2] }}</td>
