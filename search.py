@@ -95,13 +95,13 @@ def scrape_upwork_jobs():
                     posted_time = "Unknown"
 
                 posted_minutes_ago = parse_posted_time(posted_time)
-                if posted_minutes_ago > 120:  # 2 hours
-                    print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
+
+                # Only include jobs posted within the last 2 hours
+                if posted_minutes_ago > 120:
                     continue
 
-                print(f"✅ Found Job: {title} | {posted_time}")
-
-                all_jobs.append((title, job_link, posted_time))
+                # Store job as tuple (title, link, posted_time, keyword)
+                all_jobs.append((title, job_link, posted_time, keyword))
 
             except Exception as e:
                 print(f"❌ Error scraping job: {e}")
@@ -109,7 +109,15 @@ def scrape_upwork_jobs():
         time.sleep(random.randint(5, 15))
 
     driver.quit()
-    return all_jobs
+
+    # Remove duplicate jobs by title
+    unique_jobs = {}
+    for job in all_jobs:
+        title = job[0]
+        if title not in unique_jobs:
+            unique_jobs[title] = job
+
+    return list(unique_jobs.values())
 
 # Store Jobs in SQLite Database
 def store_jobs_in_db(jobs):
