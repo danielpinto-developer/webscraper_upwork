@@ -3,45 +3,63 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Upwork Scraper</title>
+    <title>Upwork Jobs - Last 2 Hours</title>
     <style>
       body {
         font-family: Arial, sans-serif;
         margin: 20px;
+        background-color: #f9f9f9;
+        color: #333;
       }
       table {
         width: 100%;
         border-collapse: collapse;
+        margin-top: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
       th,
       td {
         border: 1px solid #ddd;
-        padding: 8px;
+        padding: 10px;
         text-align: left;
       }
       th {
         background-color: #007bff;
         color: white;
       }
+      h2 {
+        color: #007bff;
+        text-align: center;
+      }
+      a {
+        color: #007bff;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
     <h2>🚀 Upwork Jobs - Last 2 Hours</h2>
+
     <table>
-      <tr>
-        <th>Job Title</th>
-        <th>Posted Time</th>
-      </tr>
-      {% for job in jobs %}
-      <tr>
-        <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
-        <td>{{ job[2] }}</td>
-      </tr>
-      {% else %}
-      <tr>
-        <td colspan="2">No recent jobs found.</td>
-      </tr>
-      {% endfor %}
+      <thead>
+        <tr>
+          <th>Job Title</th>
+          <th>Posted Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in jobs %} {% if 'hour' in job[2] and job[2].split()[0]|int
+        <= 2 or 'minute' in job[2] %}
+        <tr>
+          <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
+          <td>{{ job[2] }}</td>
+        </tr>
+        {% endif %} {% endfor %}
+      </tbody>
     </table>
   </body>
 </html>
