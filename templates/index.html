@@ -3,109 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🚀 Upwork Jobs - Last 2 Hours</title>
+    <title>Upwork Jobs - Last 2 Hours</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        background-color: #f8f8f8;
-        margin: 0;
-        padding: 0;
-        text-align: center;
-      }
-      h1 {
-        color: #333;
-        margin: 20px 0;
+        margin: 20px;
       }
       table {
-        width: 90%;
-        margin: 0 auto;
+        width: 100%;
         border-collapse: collapse;
-        background-color: white;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        overflow: hidden;
       }
       th,
       td {
-        padding: 12px 15px;
         border: 1px solid #ddd;
+        padding: 8px;
         text-align: left;
       }
       th {
         background-color: #007bff;
         color: white;
-        text-transform: uppercase;
       }
-      tr:nth-child(even) {
-        background-color: #f2f2f2;
-      }
-      tr:hover {
-        background-color: #e9ecef;
-      }
-      a {
-        color: #007bff;
-        text-decoration: none;
-      }
-      a:hover {
-        text-decoration: underline;
-      }
-      footer {
-        margin: 20px 0;
-        color: #666;
-        font-size: 0.9em;
+      h2 {
+        text-align: center;
       }
     </style>
   </head>
   <body>
-    <h1>🚀 Upwork Jobs - Last 2 Hours</h1>
-
+    <h2>🚀 Upwork Jobs - Last 2 Hours</h2>
     <table>
-      <thead>
-        <tr>
-          <th>Job Title</th>
-          <th>Posted Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% if jobs %} {% for job in jobs %}
-        <tr>
-          <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
-          <td class="posted-time" data-time="{{ job[2] }}">{{ job[2] }}</td>
-        </tr>
-        {% endfor %} {% else %}
-        <tr>
-          <td colspan="2">
-            No recent jobs found in the last 2 hours. Please check back soon!
-          </td>
-        </tr>
-        {% endif %}
-      </tbody>
+      <tr>
+        <th>Job Title</th>
+        <th>Posted Time</th>
+      </tr>
+      {% for job in jobs %}
+      <tr>
+        <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
+        <td>{{ job[2] }}</td>
+      </tr>
+      {% endfor %}
     </table>
-
-    <footer>
-      🕰️ Page updated every 10 minutes. Only showing jobs posted within the last
-      2 hours.
-    </footer>
-
-    <script>
-      // Convert timestamp into "minutes ago" or "hours ago" format
-      function timeAgo(postedTime) {
-        const postedDate = new Date(postedTime);
-        const now = new Date();
-        const diffMs = now - postedDate;
-        const diffMinutes = Math.floor(diffMs / 60000);
-
-        if (diffMinutes < 1) return "Just now";
-        if (diffMinutes < 60) return `${diffMinutes} minutes ago`;
-        return `${Math.floor(diffMinutes / 60)} hours ago`;
-      }
-
-      // Update all posted-time fields
-      document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".posted-time").forEach(function (element) {
-          element.textContent = timeAgo(element.getAttribute("data-time"));
-        });
-      });
-    </script>
   </body>
 </html>

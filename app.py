@@ -1,10 +1,10 @@
-import sqlite3
 from flask import Flask, render_template
+import sqlite3
 
 app = Flask(__name__)
+
 DB_NAME = "upwork_jobs.db"
 
-# Fetch jobs from SQLite
 def get_jobs():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -13,7 +13,6 @@ def get_jobs():
     conn.close()
     return jobs
 
-# Home route to display jobs
 @app.route("/")
 def home():
     jobs = get_jobs()

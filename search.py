@@ -1,13 +1,13 @@
-import sqlite3
 import time
 import random
 import signal
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome.service import Service
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 import re
-import datetime
+import sqlite3
 
 # Database Name
 DB_NAME = "upwork_jobs.db"
@@ -23,7 +23,7 @@ def timeout_handler(signum, frame):
 signal.signal(signal.SIGALRM, timeout_handler)
 signal.alarm(TIMEOUT)
 
-# Set Up Database (Fresh every run)
+# Set Up Database
 def setup_database():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -42,7 +42,8 @@ def setup_database():
     print("✅ Database setup complete.")
 
 # Keywords to Search
-SEARCH_KEYWORDS = ["scraping", "python", "ai", "api", "bot", "automation", "data", "machine learning", "chatbot", "web scraping", "api integration", "flask", "bubble", "app development", "react"]
+SEARCH_KEYWORDS = ["scraping", "python", "ai", "api", "bot", "automation", "machine learning",
+                   "data", "selenium", "cloud", "fintech", "backend", "frontend", "full stack"]
 
 # Convert posted time to minutes
 def parse_posted_time(posted_time):
@@ -84,7 +85,8 @@ def scrape_upwork_jobs():
                 job_link = title_element.get_attribute("href")
 
                 try:
-                    posted_time_element = job.find_element(By.CSS_SELECTOR, "small[data-test='job-pubilshed-date']")
+                    # Updated selector for Upwork's new format
+                    posted_time_element = job.find_element(By.CSS_SELECTOR, "span[data-test='posted-on']")
                     posted_time = posted_time_element.text.strip()
                 except:
                     posted_time = "Unknown"
@@ -95,9 +97,9 @@ def scrape_upwork_jobs():
                     print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
                     continue
 
-                # ✅ Always insert job without duplicate check!
-                print(f"✅ New Job Found: {title} | {posted_time}")
-                all_jobs.append((title, "N/A", 0, job_link, datetime.datetime.utcnow().isoformat()))
+                print(f"✅ Found Job: {title} | {posted_time}")
+
+                all_jobs.append((title, "N/A", 0, job_link, posted_time))
 
             except Exception as e:
                 print(f"❌ Error scraping job: {e}")
@@ -129,7 +131,6 @@ if __name__ == "__main__":
     if jobs:
         store_jobs_in_db(jobs)
     else:
-        print("❌ No new jobs found.")
+        print("❌ No matching jobs found.")
 
     print("✅ Scraper finished.")
-
