@@ -2,13 +2,13 @@ import sqlite3
 import time
 import random
 import signal
-import datetime
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 import re
+import datetime
 
 # Database Name
 DB_NAME = "upwork_jobs.db"
@@ -43,18 +43,22 @@ def setup_database():
     print("✅ Database setup complete.")
 
 # Keywords to Search
-SEARCH_KEYWORDS = ["scraping", "python", "ai", "api", "bot", "automation", "data", "developer", "flask", "django", "bubble", "chatbot", "web", "app", "software"]
+SEARCH_KEYWORDS = ["scraping", "python", "ai", "api", "bot", "automation", "chrome", "selenium", "chatbot", "developer", "integration", "web", "backend", "frontend"]
 
 # Convert posted time to datetime
 def parse_posted_time(posted_time):
-    match = re.search(r"(\d+)\s*(minute|hour)", posted_time)
-    if match:
-        value, unit = int(match.group(1)), match.group(2)
-        if unit == "minute":
-            return datetime.datetime.now() - datetime.timedelta(minutes=value)
-        elif unit == "hour":
-            return datetime.datetime.now() - datetime.timedelta(hours=value)
-    return None
+    try:
+        if "minute" in posted_time:
+            minutes = int(posted_time.split()[0])
+            return datetime.datetime.now() - datetime.timedelta(minutes=minutes)
+        elif "hour" in posted_time:
+            hours = int(posted_time.split()[0])
+            return datetime.datetime.now() - datetime.timedelta(hours=hours)
+        else:
+            return None
+    except Exception as e:
+        print(f"⚠️ Error parsing posted time '{posted_time}': {e}")
+        return None
 
 # Start Selenium WebDriver
 def start_driver():
@@ -75,7 +79,7 @@ def scrape_upwork_jobs():
         search_url = f"https://www.upwork.com/nx/jobs/search/?q={keyword}&sort=recency"
         print(f"🔍 Searching for: {keyword}")
         driver.get(search_url)
-        time.sleep(random.randint(3, 10))  # Wait for page to load
+        time.sleep(random.randint(3, 10))
 
         jobs = driver.find_elements(By.CSS_SELECTOR, "article[data-test='JobTile']")
         print(f"🔍 Found {len(jobs)} job listings for '{keyword}'")
@@ -90,40 +94,35 @@ def scrape_upwork_jobs():
                     # Updated selector for Upwork's new format
                     posted_time_element = job.find_element(By.CSS_SELECTOR, "span[data-test='posted-on']")
                     posted_time = posted_time_element.text.strip()
-                except:
-                    posted_time = "Unknown"
 
-                # Convert posted time to datetime & filter only jobs in the last 2 hours
-                actual_posted_time = parse_posted_time(posted_time)
-                if not actual_posted_time:
-                    print(f"🕒 Skipping (Invalid Time): {title} - {posted_time}")
+                    # Convert to datetime and filter within 2 hours
+                    job_post_time = parse_posted_time(posted_time)
+                    if job_post_time and (datetime.datetime.now() - job_post_time).total_seconds() > 7200:
+                        print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
+                        continue
+
+                except Exception as e:
+                    print(f"❌ Failed to get posted time: {e}")
                     continue
 
-                two_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=2)
-
-                if actual_posted_time < two_hours_ago:
-                    print(f"🕒 Skipping (Too Old): {title} - {posted_time}")
-                    continue
-
-                print(f"✅ Found Job: {title} | {actual_posted_time}")
-
-                all_jobs.append((title, "N/A", 0, job_link, actual_posted_time.isoformat()))
+                print(f"✅ Found Job: {title} | {posted_time}")
+                all_jobs.append((title, "N/A", 0, job_link, posted_time))
 
             except Exception as e:
                 print(f"❌ Error scraping job: {e}")
 
-        time.sleep(random.randint(5, 15))  # Human-like delay
+        time.sleep(random.randint(5, 15))
 
     driver.quit()
-
-    # Sort jobs from most recent to oldest
-    all_jobs.sort(key=lambda x: x[4], reverse=True)
     return all_jobs
 
 # Store Jobs in SQLite Database
 def store_jobs_in_db(jobs):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
+
+    # Clear old jobs to keep only fresh ones
+    cursor.execute("DELETE FROM jobs")
 
     for job in jobs:
         cursor.execute('''
