@@ -10,17 +10,22 @@ def get_recent_jobs():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # Fetch jobs posted within the last 2 hours
+    # Get current time and subtract 2 hours
+    two_hours_ago = datetime.datetime.now() - datetime.timedelta(hours=2)
+
+    # Query to fetch jobs within the last 2 hours
     cursor.execute("""
         SELECT title, job_link, posted_time 
         FROM jobs 
-        WHERE posted_time LIKE '%hour%' OR posted_time LIKE '%minute%'
+        WHERE posted_time LIKE '%minute%' 
+        OR (posted_time LIKE '%hour%' AND CAST(SUBSTR(posted_time, 1, INSTR(posted_time, ' ') - 1) AS INTEGER) <= 2)
         ORDER BY id DESC
-    """
-    )
+    """)
+
     jobs = cursor.fetchall()
     conn.close()
     return jobs
+
 
 # Flask route to display the jobs
 @app.route("/")
