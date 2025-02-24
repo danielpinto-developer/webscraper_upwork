@@ -60,8 +60,8 @@
         </tr>
       </thead>
       <tbody>
-        {% set found = false %} {% for job in jobs %} {% if keyword.lower() in
-        job[0].lower() %} {% set found = true %}
+        {% set found = false %} {% for job in jobs %} {% if keyword in
+        job[0]|lower %} {% set found = true %}
         <tr>
           <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
           <td>{{ job[2] }}</td>
