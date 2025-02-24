@@ -48,10 +48,7 @@
   <body>
     <h2>🚀 Upwork Jobs - Last 2 Hours</h2>
 
-    {% set keywords = ["scraping", "python", "ai", "api", "bot", "automation",
-    "chrome", "selenium", "chatbot", "developer", "integration", "web",
-    "backend", "frontend"] %} {% for keyword in keywords %}
-    <h3>🔑 {{ keyword.capitalize() }} Jobs</h3>
+    {% for job in jobs %}
     <table>
       <thead>
         <tr>
@@ -60,17 +57,10 @@
         </tr>
       </thead>
       <tbody>
-        {% set found = false %} {% for job in jobs %} {% if keyword in
-        job[0]|lower %} {% set found = true %}
         <tr>
           <td><a href="{{ job[1] }}" target="_blank">{{ job[0] }}</a></td>
           <td>{{ job[2] }}</td>
         </tr>
-        {% endif %} {% endfor %} {% if not found %}
-        <tr>
-          <td colspan="2">No jobs found for "{{ keyword }}"</td>
-        </tr>
-        {% endif %}
       </tbody>
     </table>
     {% endfor %}
